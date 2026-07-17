@@ -6,11 +6,13 @@ import { StageCanvas } from "./components/StageCanvas";
 import {
   advanceDemoState,
   addIntakeSource,
+  addUploadedIntakeSource,
   createInitialDemoState,
   getPrimaryActionLabel,
   resetDemoState,
   setDemoStage,
   STAGE_COPY,
+  type IntakeUploadPayload,
   type IntakeId,
   type StageId,
   updateOwnerGoal,
@@ -32,6 +34,10 @@ export function App() {
 
   function handleIntakeSample(intakeId: IntakeId) {
     setDemoState((current) => addIntakeSource(current, intakeId));
+  }
+
+  function handleIntakeUpload(intakeId: IntakeId, payload: IntakeUploadPayload) {
+    setDemoState((current) => addUploadedIntakeSource(current, intakeId, payload));
   }
 
   function handleOwnerGoalChange(ownerGoal: string) {
@@ -77,6 +83,7 @@ export function App() {
             demoState={demoState}
             kicker={copy.kicker}
             onIntakeSample={handleIntakeSample}
+            onIntakeUpload={handleIntakeUpload}
             onOwnerGoalChange={handleOwnerGoalChange}
             onPrimaryAction={handlePrimaryAction}
             stage={stage}

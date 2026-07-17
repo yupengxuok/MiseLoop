@@ -2,6 +2,7 @@ import {
   isActionDisabled,
   type DemoState,
   type IntakeId,
+  type IntakeUploadPayload,
   type StageId,
 } from "../lib/demoState/demoState";
 import { ConnectView } from "../views/ConnectView";
@@ -15,6 +16,7 @@ type StageCanvasProps = {
   demoState: DemoState;
   kicker: string;
   onIntakeSample: (intakeId: IntakeId) => void;
+  onIntakeUpload: (intakeId: IntakeId, payload: IntakeUploadPayload) => void;
   onOwnerGoalChange: (ownerGoal: string) => void;
   onPrimaryAction: () => void;
   stage: StageId;
@@ -26,6 +28,7 @@ export function StageCanvas({
   demoState,
   kicker,
   onIntakeSample,
+  onIntakeUpload,
   onOwnerGoalChange,
   onPrimaryAction,
   stage,
@@ -48,7 +51,13 @@ export function StageCanvas({
         </button>
       </div>
 
-      {stage === "connect" && <ConnectView demoState={demoState} onIntakeSample={onIntakeSample} />}
+      {stage === "connect" && (
+        <ConnectView
+          demoState={demoState}
+          onIntakeSample={onIntakeSample}
+          onIntakeUpload={onIntakeUpload}
+        />
+      )}
       {stage === "generate" && (
         <GenerateView demoState={demoState} onOwnerGoalChange={onOwnerGoalChange} />
       )}
