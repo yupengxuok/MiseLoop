@@ -43,6 +43,7 @@ export type DashboardResponse = ApiEnvelope<{
   };
   timeline: DashboardTimelineItem[];
   recommendation: Partial<DashboardRecommendation> | null;
+  recommendation_diff?: DashboardRecommendationDiff[];
   metrics: {
     capabilities_resolved: number;
     workflow_runs: number;
@@ -97,6 +98,14 @@ export type DashboardRecommendation = {
     action: string;
     reason: string;
   }>;
+};
+
+export type DashboardRecommendationDiff = {
+  field?: string;
+  label?: string;
+  before?: string | number;
+  after?: string | number;
+  reason?: string;
 };
 
 export type DashboardContextDiff = {

@@ -3,12 +3,14 @@ import type {
   DemoPhase,
   DemoState,
   Recommendation,
+  RecommendationDiff,
   RunTimelineItem,
   SourceCard,
 } from "../demoState/demoState";
 import type {
   DashboardContextDiff,
   DashboardRecommendation,
+  DashboardRecommendationDiff,
   DashboardResponse,
   DashboardSourceCard,
   DashboardTimelineItem,
@@ -44,6 +46,10 @@ export function mapDashboardToDemoState(
     runTimeline: mapTimeline(dashboard.data.timeline, fallbackState.runTimeline),
     recommendation: mapRecommendation(dashboard.data.recommendation, fallbackState.recommendation),
     contextDiff: mapContextDiff(dashboard.data.context?.last_diff, fallbackState.contextDiff),
+    recommendationDiff: mapRecommendationDiff(
+      dashboard.data.recommendation_diff,
+      fallbackState.recommendationDiff,
+    ),
     metrics: {
       capabilitiesResolved: dashboard.data.metrics.capabilities_resolved,
       workflowRuns: dashboard.data.metrics.workflow_runs,
@@ -176,6 +182,23 @@ function mapContextDiff(
     before: String(item.before ?? "unknown"),
     after: String(item.after ?? "unknown"),
     impact: item.impact ?? "Dashboard context changed.",
+  }));
+}
+
+function mapRecommendationDiff(
+  diff: DashboardRecommendationDiff[] | undefined,
+  fallback: RecommendationDiff[],
+): RecommendationDiff[] {
+  if (!diff || diff.length === 0) {
+    return fallback;
+  }
+
+  return diff.map((item, index) => ({
+    field: item.field ?? `recommendation.diff.${index + 1}`,
+    label: item.label ?? toTitle(item.field ?? `Change ${index + 1}`),
+    before: String(item.before ?? "unknown"),
+    after: String(item.after ?? "unknown"),
+    reason: item.reason ?? "Recommendation changed after context update.",
   }));
 }
 

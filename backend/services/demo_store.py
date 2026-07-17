@@ -95,6 +95,7 @@ class DemoStore:
             },
             "timeline": deepcopy(state["timeline"]),
             "recommendation": deepcopy(state["recommendation"]),
+            "recommendation_diff": deepcopy(state["recommendation_diff"]),
             "metrics": deepcopy(state["metrics"]),
             "integration_diagnostics": self._integration_diagnostics(),
         }
@@ -193,6 +194,7 @@ class DemoStore:
         self.state["workflow_status"] = result["status"]
         self.state["run_id"] = result["run_id"]
         self.state["recommendation"] = deepcopy(result["recommendation"])
+        self.state["recommendation_diff"] = deepcopy(result["recommendation_diff"])
         self.state["metrics"]["workflow_runs"] = 2
         self.state["metrics"]["self_corrections"] = 1 if result["context_diff_applied"] else 0
         self.state["metrics"]["estimated_cost_savings"] = result["recommendation"][
@@ -222,6 +224,7 @@ class DemoStore:
             "bound_capabilities": [],
             "timeline": [],
             "recommendation": {},
+            "recommendation_diff": [],
             "metrics": {
                 "capabilities_resolved": 0,
                 "workflow_runs": 0,
