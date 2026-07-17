@@ -3,49 +3,71 @@ import { InspectorDrawer } from "./components/InspectorDrawer";
 import { ProgressRail } from "./components/ProgressRail";
 import { Sidebar } from "./components/Sidebar";
 import { StageCanvas } from "./components/StageCanvas";
+import { demoApi } from "./lib/api/demoApi";
+import { createFixtureInitialState } from "./lib/api/fixtureApi";
 import {
-  advanceDemoState,
-  addIntakeSource,
-  addUploadedIntakeSource,
-  createInitialDemoState,
   getPrimaryActionLabel,
-  resetDemoState,
-  setDemoStage,
   STAGE_COPY,
   type IntakeUploadPayload,
   type IntakeId,
   type StageId,
-  updateOwnerGoal,
 } from "./lib/demoState/demoState";
 
 export function App() {
-  const [demoState, setDemoState] = useState(createInitialDemoState);
+  const [demoState, setDemoState] = useState(createFixtureInitialState);
+  const [isPending, setIsPending] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const stage = demoState.activeStage;
   const copy = STAGE_COPY[stage];
 
+  async function applyApiUpdate(update: (current: typeof demoState) => Promise<typeof demoState>) {
+    setIsPending(true);
+    try {
+      const nextState = await update(demoState);
+      setDemoState(nextState);
+    } catch (error) {
+      setDemoState((current) => ({
+        ...current,
+        responseTitle: "API adapter error",
+        response: {
+          success: false,
+          message: error instanceof Error ? error.message : "Unknown API adapter error",
+          error_code: "FRONTEND_API_ADAPTER_ERROR",
+          data: null,
+          meta: {
+            request_id: "req_frontend_adapter_error",
+            fallback_available: demoApi.mode === "real",
+          },
+          timestamp: new Date().toISOString(),
+        },
+      }));
+    } finally {
+      setIsPending(false);
+    }
+  }
+
   function handleStageChange(nextStage: StageId) {
-    setDemoState((current) => setDemoStage(current, nextStage));
+    void applyApiUpdate((current) => demoApi.setStage(current, nextStage));
   }
 
   function handlePrimaryAction() {
-    setDemoState((current) => advanceDemoState(current));
+    void applyApiUpdate((current) => demoApi.advance(current));
   }
 
   function handleIntakeSample(intakeId: IntakeId) {
-    setDemoState((current) => addIntakeSource(current, intakeId));
+    void applyApiUpdate((current) => demoApi.addIntakeSample(current, intakeId));
   }
 
   function handleIntakeUpload(intakeId: IntakeId, payload: IntakeUploadPayload) {
-    setDemoState((current) => addUploadedIntakeSource(current, intakeId, payload));
+    void applyApiUpdate((current) => demoApi.addIntakeUpload(current, intakeId, payload));
   }
 
   function handleOwnerGoalChange(ownerGoal: string) {
-    setDemoState((current) => updateOwnerGoal(current, ownerGoal));
+    void applyApiUpdate((current) => demoApi.updateOwnerGoal(current, ownerGoal));
   }
 
-  function handleReset() {
-    setDemoState(resetDemoState());
+  async function handleReset() {
+    await applyApiUpdate(() => demoApi.reset());
     setInspectorOpen(false);
   }
 
@@ -65,7 +87,8 @@ export function App() {
             <span className="metric-pill">{demoState.metrics.workflowRuns} runs</span>
             <span className="mode-pill live">Zero live</span>
             <span className="mode-pill fixture">Nexla fixture</span>
-            <button className="ghost-button" onClick={handleReset} type="button">
+            <span className="metric-pill">api: {demoApi.mode}</span>
+            <button className="ghost-button" disabled={isPending} onClick={handleReset} type="button">
               Reset
             </button>
           </div>
@@ -85,7 +108,7 @@ export function App() {
             onIntakeSample={handleIntakeSample}
             onIntakeUpload={handleIntakeUpload}
             onOwnerGoalChange={handleOwnerGoalChange}
-            onPrimaryAction={handlePrimaryAction}
+            onPrimaryAction={isPending ? undefined : handlePrimaryAction}
             stage={stage}
             title={copy.title}
           />

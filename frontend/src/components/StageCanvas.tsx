@@ -18,7 +18,7 @@ type StageCanvasProps = {
   onIntakeSample: (intakeId: IntakeId) => void;
   onIntakeUpload: (intakeId: IntakeId, payload: IntakeUploadPayload) => void;
   onOwnerGoalChange: (ownerGoal: string) => void;
-  onPrimaryAction: () => void;
+  onPrimaryAction?: () => void;
   stage: StageId;
   title: string;
 };
@@ -43,7 +43,7 @@ export function StageCanvas({
         </div>
         <button
           className="primary-button"
-          disabled={isActionDisabled(demoState.phase)}
+          disabled={isActionDisabled(demoState.phase) || !onPrimaryAction}
           onClick={onPrimaryAction}
           type="button"
         >
