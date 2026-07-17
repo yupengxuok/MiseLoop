@@ -64,7 +64,7 @@ def build_context(body: dict[str, Any]) -> dict[str, Any]:
         message="Restaurant Context built from mixed restaurant inputs.",
         data=data,
         request_prefix="req_context_build",
-        dependency_mode={"nexla": "fixture"},
+        dependency_mode=data.get("dependency_mode", {"nexla": "fixture"}),
         context_version=data["context_version"],
     )
 

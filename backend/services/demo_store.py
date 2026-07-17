@@ -12,6 +12,8 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
+from .nexla_context_provider import NexlaContextProvider
+
 
 DependencyMode = dict[str, str]
 
@@ -221,6 +223,7 @@ def envelope(
 
 class DemoStore:
     def __init__(self) -> None:
+        self.nexla_context_provider = NexlaContextProvider()
         self.state = self._initial_state()
 
     def reset(self) -> dict[str, Any]:
@@ -246,31 +249,17 @@ class DemoStore:
 
     def build_context(self, body: dict[str, Any]) -> dict[str, Any]:
         sources = body.get("sources") or self._default_sources()
-        source_cards = [self._source_card(source) for source in sources]
+        context_data = self.nexla_context_provider.build(sources)
+        source_cards = context_data["source_cards"]
         self.state["context"] = {
-            "context_id": DEFAULT_CONTEXT_ID,
-            "version": "ctx_v001",
+            "context_id": context_data["context_id"],
+            "version": context_data["context_version"],
             "source_cards": source_cards,
             "last_diff": [],
         }
         self.state["workflow_status"] = "CONTEXT_READY"
-        self.state["dependency_mode"]["nexla"] = "fixture"
-        return {
-            "context_id": DEFAULT_CONTEXT_ID,
-            "context_version": "ctx_v001",
-            "freshness": {
-                "sales": "2026-07-17T17:00:00Z",
-                "inventory": "2026-07-17T17:05:00Z",
-                "supplier_prices": "2026-07-17T17:10:00Z",
-            },
-            "restaurant_context": {
-                "sales": {"by_day": [], "by_item": []},
-                "inventory": {"on_hand": [], "spoilage_risk": []},
-                "supplier_price": {"by_item": [], "delivery_days": [], "reliability": []},
-                "external": {},
-            },
-            "source_cards": source_cards,
-        }
+        self.state["dependency_mode"].update(context_data["dependency_mode"])
+        return context_data
 
     def generate_workflow(self, body: dict[str, Any]) -> dict[str, Any]:
         self.state["workflow_id"] = DEFAULT_WORKFLOW_ID

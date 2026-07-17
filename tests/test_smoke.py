@@ -23,7 +23,10 @@ def test_api_shell_demo_flow():
         },
     )
     assert build.status_code == 200
-    assert build.json()["data"]["context_version"] == "ctx_v001"
+    build_data = build.json()["data"]
+    assert build_data["context_version"] == "ctx_v001"
+    assert build_data["source_cards"]
+    assert "nexla" in build.json()["meta"]["dependency_mode"]
 
     generate = client.post(
         "/api/agents/generate",
