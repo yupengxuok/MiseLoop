@@ -32,13 +32,21 @@ const sources = [
   },
 ];
 
-export function ConnectView() {
+type ConnectViewProps = {
+  phase: DemoPhase;
+};
+
+export function ConnectView({ phase }: ConnectViewProps) {
+  const contextBuilt = phase !== "EMPTY";
+
   return (
     <div className="stage-panel active">
       <div className="intake-tray">
         {intakeItems.map((item) => (
           <article className="intake-chip" key={item.label}>
-            <span className="status mapped">{item.status}</span>
+            <span className={contextBuilt ? "status mapped" : "status approval"}>
+              {contextBuilt ? item.status : "Ready"}
+            </span>
             <strong>{item.label}</strong>
             <p>{item.detail}</p>
           </article>
@@ -50,7 +58,9 @@ export function ConnectView() {
           <article className="source-card" key={source.title}>
             <div className="source-top">
               <span className={`source-icon ${source.tone}`}>{source.icon}</span>
-              <span className="status mapped">Mapped</span>
+              <span className={contextBuilt ? "status mapped" : "status approval"}>
+                {contextBuilt ? "Mapped" : "Waiting"}
+              </span>
             </div>
             <h3>{source.title}</h3>
             <p>{source.copy}</p>
@@ -65,7 +75,7 @@ export function ConnectView() {
       <div className="context-summary">
         <div>
           <span className="summary-label">Context version</span>
-          <strong>ctx_v001</strong>
+          <strong>{contextBuilt ? "ctx_v001" : "not built"}</strong>
         </div>
         <div>
           <span className="summary-label">Normalized records</span>
@@ -73,9 +83,10 @@ export function ConnectView() {
         </div>
         <div>
           <span className="summary-label">Demo confidence</span>
-          <strong>Stable fallback</strong>
+          <strong>{contextBuilt ? "Stable fallback" : "Ready to build"}</strong>
         </div>
       </div>
     </div>
   );
 }
+import type { DemoPhase } from "../lib/demoState/demoState";

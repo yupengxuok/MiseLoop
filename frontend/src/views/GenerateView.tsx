@@ -1,3 +1,5 @@
+import type { DemoPhase } from "../lib/demoState/demoState";
+
 const steps = [
   { label: "Load Nexla Restaurant Context", state: "done" },
   { label: "Check weather forecast", state: "blocked" },
@@ -6,17 +8,28 @@ const steps = [
   { label: "Draft purchase plan", state: "" },
 ];
 
-export function GenerateView() {
+type GenerateViewProps = {
+  phase: DemoPhase;
+};
+
+export function GenerateView({ phase }: GenerateViewProps) {
+  const generated = phase !== "EMPTY" && phase !== "CONTEXT_READY";
+
   return (
     <div className="stage-panel active">
       <div className="goal-box">
-        <span className="status ready">Owner goal</span>
+        <span className={generated ? "status blocked" : "status ready"}>
+          {generated ? "Workflow blocked" : "Owner goal"}
+        </span>
         <h3>Create a weekend prep agent for this Friday.</h3>
         <p>Recommendation only for purchase orders. Manager approval required for external writes.</p>
       </div>
       <div className="workflow-list">
         {steps.map((step) => (
-          <div className={["workflow-step", step.state].filter(Boolean).join(" ")} key={step.label}>
+          <div
+            className={["workflow-step", generated ? step.state : ""].filter(Boolean).join(" ")}
+            key={step.label}
+          >
             <span />
             {step.label}
           </div>

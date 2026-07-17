@@ -9,15 +9,29 @@ const capabilities = [
   },
 ];
 
-export function ResolveView() {
+type ResolveViewProps = {
+  phase: DemoPhase;
+};
+
+export function ResolveView({ phase }: ResolveViewProps) {
+  const resolved = ["READY", "RUNNING", "COMPLETED_WITH_RECOMMENDATION", "PATCHED_RECOMMENDATION"].includes(
+    phase,
+  );
+
   return (
     <div className="stage-panel active">
       <div className="blocked-banner">
         <div>
-          <span className="status blocked">Blocked</span>
-          <h3>Missing capabilities detected</h3>
+          <span className={resolved ? "status ready" : "status blocked"}>
+            {resolved ? "Ready" : "Blocked"}
+          </span>
+          <h3>{resolved ? "Capabilities bound by Zero" : "Missing capabilities detected"}</h3>
         </div>
-        <p>weather_forecast and local_event_calendar are not in the local registry.</p>
+        <p>
+          {resolved
+            ? "weather_forecast and local_event_calendar passed sample validation."
+            : "weather_forecast and local_event_calendar are not in the local registry."}
+        </p>
       </div>
       <div className="resolve-grid">
         {capabilities.map((capability) => (
@@ -27,10 +41,13 @@ export function ResolveView() {
               <h3>{capability.name}</h3>
               <p>{capability.reason}</p>
             </div>
-            <span className="status ready">Passed</span>
+            <span className={resolved ? "status ready" : "status approval"}>
+              {resolved ? "Passed" : "Pending"}
+            </span>
           </article>
         ))}
       </div>
     </div>
   );
 }
+import type { DemoPhase } from "../lib/demoState/demoState";

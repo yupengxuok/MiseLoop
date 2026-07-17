@@ -1,3 +1,5 @@
+import type { DemoPhase } from "../lib/demoState/demoState";
+
 const timeline = [
   ["Context loaded", "Restaurant Context loaded from Nexla provider.", "complete"],
   ["Weather checked", "Rain probability is 82% for Saturday.", "complete"],
@@ -5,7 +7,13 @@ const timeline = [
   ["Purchase plan drafted", "Pending manager approval before external write.", "approval"],
 ];
 
-export function RunView() {
+type RunViewProps = {
+  phase: DemoPhase;
+};
+
+export function RunView({ phase }: RunViewProps) {
+  const completed = phase === "COMPLETED_WITH_RECOMMENDATION" || phase === "PATCHED_RECOMMENDATION";
+
   return (
     <div className="stage-panel active run-panel">
       <div className="timeline">
@@ -21,11 +29,13 @@ export function RunView() {
       </div>
 
       <aside className="recommendation">
-        <span className="status approval">Pending approval</span>
+        <span className={completed ? "status approval" : "status ready"}>
+          {completed ? "Pending approval" : "Ready to run"}
+        </span>
         <h3>Weekend purchase plan</h3>
         <p>Increase indoor comfort items, reduce patio-heavy prep, and switch tomato supplier.</p>
         <div className="impact-row">
-          <strong>$143.50</strong>
+          <strong>{completed ? "$143.50" : "$0.00"}</strong>
           <span>estimated savings</span>
         </div>
       </aside>

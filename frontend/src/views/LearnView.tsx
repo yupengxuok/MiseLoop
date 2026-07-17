@@ -1,4 +1,12 @@
-export function LearnView() {
+import type { DemoState } from "../lib/demoState/demoState";
+
+type LearnViewProps = {
+  demoState: DemoState;
+};
+
+export function LearnView({ demoState }: LearnViewProps) {
+  const patched = demoState.phase === "PATCHED_RECOMMENDATION";
+
   return (
     <div className="stage-panel active">
       <div className="diff-view">
@@ -10,23 +18,27 @@ export function LearnView() {
         <div className="diff-arrow">to</div>
         <div className="diff-column after">
           <span className="summary-label">After</span>
-          <h3>Vendor B</h3>
-          <p>Vendor A rose to $2.85. Loop patched the plan automatically.</p>
+          <h3>{patched ? "Vendor B" : "Waiting for update"}</h3>
+          <p>
+            {patched
+              ? "Vendor A rose to $2.85. Loop patched the plan automatically."
+              : "Apply a supplier price update to trigger the rerun and recommendation diff."}
+          </p>
         </div>
       </div>
 
       <div className="context-summary">
         <div>
           <span className="summary-label">New context</span>
-          <strong>ctx_v002</strong>
+          <strong>{demoState.contextVersion ?? "ctx_v001"}</strong>
         </div>
         <div>
           <span className="summary-label">Self corrections</span>
-          <strong>1</strong>
+          <strong>{demoState.metrics.selfCorrections}</strong>
         </div>
         <div>
           <span className="summary-label">Workflow status</span>
-          <strong>PATCHED</strong>
+          <strong>{patched ? "PATCHED" : demoState.phase}</strong>
         </div>
       </div>
     </div>

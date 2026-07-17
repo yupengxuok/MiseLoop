@@ -1,9 +1,12 @@
+import type { DemoState } from "../lib/demoState/demoState";
+
 type InspectorDrawerProps = {
+  demoState: DemoState;
   isOpen: boolean;
   onToggle: () => void;
 };
 
-export function InspectorDrawer({ isOpen, onToggle }: InspectorDrawerProps) {
+export function InspectorDrawer({ demoState, isOpen, onToggle }: InspectorDrawerProps) {
   return (
     <aside className={isOpen ? "inspector" : "inspector collapsed"}>
       <button
@@ -17,8 +20,16 @@ export function InspectorDrawer({ isOpen, onToggle }: InspectorDrawerProps) {
       <div className="inspector-content">
         <div className="inspector-header">
           <p className="eyebrow">Runtime evidence</p>
-          <h2>Bound capability</h2>
+          <h2>{demoState.responseTitle}</h2>
         </div>
+
+        <section>
+          <span className="summary-label">Demo phase</span>
+          <div className="mode-stack">
+            <span className="status phase">{demoState.phase}</span>
+            {demoState.contextVersion && <span className="mode-pill fixture">{demoState.contextVersion}</span>}
+          </div>
+        </section>
 
         <section>
           <span className="summary-label">Dependency mode</span>
@@ -29,20 +40,8 @@ export function InspectorDrawer({ isOpen, onToggle }: InspectorDrawerProps) {
         </section>
 
         <section>
-          <span className="summary-label">Sample output</span>
-          <pre>{`{
-  "rain_probability": 82,
-  "temperature_f": 58,
-  "validation_status": "PASSED"
-}`}</pre>
-        </section>
-
-        <section>
-          <span className="summary-label">Output schema</span>
-          <pre>{`{
-  "rain_probability": "number",
-  "temperature_f": "number"
-}`}</pre>
+          <span className="summary-label">Current mock response</span>
+          <pre>{JSON.stringify(demoState.response, null, 2)}</pre>
         </section>
       </div>
     </aside>
