@@ -1,42 +1,87 @@
-import type { DemoPhase } from "../lib/demoState/demoState";
-
-const timeline = [
-  ["Context loaded", "Restaurant Context loaded from Nexla provider.", "complete"],
-  ["Weather checked", "Rain probability is 82% for Saturday.", "complete"],
-  ["Suppliers ranked", "Supplier B is first for tomatoes.", "complete"],
-  ["Purchase plan drafted", "Pending manager approval before external write.", "approval"],
-];
+import type { DemoState, RunTimelineItem } from "../lib/demoState/demoState";
 
 type RunViewProps = {
-  phase: DemoPhase;
+  demoState: DemoState;
 };
 
-export function RunView({ phase }: RunViewProps) {
-  const completed = phase === "COMPLETED_WITH_RECOMMENDATION" || phase === "PATCHED_RECOMMENDATION";
+function getTimelineClass(status: RunTimelineItem["status"]) {
+  if (status === "PENDING_APPROVAL") return "approval";
+  if (status === "COMPLETED") return "complete";
+  return "pending";
+}
+
+export function RunView({ demoState }: RunViewProps) {
+  const completed =
+    demoState.phase === "COMPLETED_WITH_RECOMMENDATION" ||
+    demoState.phase === "PATCHED_RECOMMENDATION";
+  const recommendation = demoState.recommendation;
 
   return (
     <div className="stage-panel active run-panel">
-      <div className="timeline">
-        {timeline.map(([title, copy, state]) => (
-          <div className={`timeline-item ${state}`} key={title}>
-            <span />
-            <div>
-              <strong>{title}</strong>
-              <p>{copy}</p>
-            </div>
+      <section className="run-timeline-panel">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Execution timeline</p>
+            <h3>{completed ? "Workflow completed" : "Ready to execute validated steps"}</h3>
           </div>
-        ))}
-      </div>
+          <span className={completed ? "status ready" : "status approval"}>
+            {completed ? "COMPLETED" : "READY"}
+          </span>
+        </div>
+
+        <div className="timeline">
+          {demoState.runTimeline.map((item) => (
+            <div className={`timeline-item ${getTimelineClass(item.status)}`} key={item.id}>
+              <span />
+              <div>
+                <div className="timeline-item-top">
+                  <strong>{item.label}</strong>
+                  <small>{item.status}</small>
+                </div>
+                <p>{item.summary}</p>
+                <em>{item.evidence}</em>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <aside className="recommendation">
         <span className={completed ? "status approval" : "status ready"}>
-          {completed ? "Pending approval" : "Ready to run"}
+          {completed ? "Pending approval" : "Recommendation not created"}
         </span>
-        <h3>Weekend purchase plan</h3>
-        <p>Increase indoor comfort items, reduce patio-heavy prep, and switch tomato supplier.</p>
-        <div className="impact-row">
-          <strong>{completed ? "$143.50" : "$0.00"}</strong>
-          <span>estimated savings</span>
+        <h3>{recommendation.title}</h3>
+        <p>{recommendation.summary}</p>
+
+        <div className="impact-grid">
+          <div className="impact-row">
+            <strong>${recommendation.expectedImpact.estimatedCostSavings.toFixed(2)}</strong>
+            <span>estimated savings</span>
+          </div>
+          <div className="impact-row">
+            <strong>{Math.round(recommendation.expectedImpact.stockoutRiskReduction * 100)}%</strong>
+            <span>stockout risk reduction</span>
+          </div>
+          <div className="impact-row">
+            <strong>{Math.round(recommendation.expectedImpact.prepWasteReduction * 100)}%</strong>
+            <span>prep waste reduction</span>
+          </div>
+        </div>
+
+        <div className="plan-list">
+          {recommendation.planItems.map((item) => (
+            <article className="plan-item" key={item.item}>
+              <strong>{item.item}</strong>
+              <span>{item.action}</span>
+              <p>{item.reason}</p>
+            </article>
+          ))}
+        </div>
+
+        <div className="approval-gate">
+          <span className="summary-label">Approval policy</span>
+          <strong>{recommendation.approvalStatus}</strong>
+          <p>Purchase order remains recommendation only; no supplier write is executed in P0.</p>
         </div>
       </aside>
     </div>

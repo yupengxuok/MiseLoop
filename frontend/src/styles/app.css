@@ -861,14 +861,22 @@ p {
 
 .run-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 18px;
+}
+
+.run-timeline-panel {
+  min-width: 0;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(82, 55, 32, 0.05);
 }
 
 .timeline {
   display: grid;
   gap: 0;
-  max-width: 760px;
 }
 
 .timeline-item {
@@ -901,13 +909,38 @@ p {
   box-shadow: 0 0 0 5px var(--green-soft);
 }
 
+.timeline-item.pending > span {
+  background: var(--line-strong);
+  box-shadow: 0 0 0 5px var(--surface-soft);
+}
+
 .timeline-item.approval > span {
   background: var(--orange);
   box-shadow: 0 0 0 5px var(--orange-soft);
 }
 
+.timeline-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.timeline-item-top small {
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 760;
+}
+
 .timeline-item p {
-  margin-bottom: 0;
+  margin: 4px 0;
+}
+
+.timeline-item em {
+  color: var(--faint);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 650;
 }
 
 .recommendation {
@@ -915,12 +948,19 @@ p {
   align-self: start;
 }
 
+.impact-grid {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
+
 .impact-row {
   display: grid;
   gap: 4px;
-  margin-top: 22px;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
+  padding: 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
 }
 
 .impact-row strong {
@@ -932,6 +972,54 @@ p {
   color: var(--muted);
   font-size: 13px;
   font-weight: 650;
+}
+
+.plan-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.plan-item {
+  padding: 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.plan-item strong,
+.plan-item span {
+  display: block;
+}
+
+.plan-item span {
+  margin-top: 4px;
+  color: var(--orange);
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.plan-item p {
+  margin: 6px 0 0;
+  font-size: 13px;
+}
+
+.approval-gate {
+  margin-top: 14px;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--orange-soft), #fff);
+  border: 1px solid rgba(239, 118, 34, 0.22);
+  border-radius: 10px;
+}
+
+.approval-gate strong {
+  display: block;
+  margin-top: 6px;
+}
+
+.approval-gate p {
+  margin: 6px 0 0;
+  font-size: 13px;
 }
 
 .diff-view {
