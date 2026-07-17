@@ -1,16 +1,61 @@
 # MiseLoop
 
-MiseLoop is an autonomous decision loop for restaurant supply chain and operations. The current repo is a P0 demo implementation of the PRD v3 / API v3 concept: connect restaurant data, build restaurant context, generate a workflow, resolve missing capabilities, run the workflow, detect a context diff, and patch the recommendation.
+MiseLoop is an autonomous decision loop for restaurant supply chain and operations.
+
+Restaurants make hundreds of tiny operational decisions every week: what to prep, what to buy, when to switch suppliers, whether weather or local events will change demand, and how to react when prices move. Most of those decisions are trapped between messy receipts, spreadsheets, manager instinct, and tools that do not talk to each other.
+
+MiseLoop turns that chaos into a live operating loop. It connects restaurant data, builds a structured Restaurant Context, generates an agent workflow, resolves missing capabilities, runs the workflow, watches for context changes, and patches the recommendation when the world changes. The demo focuses on one very real moment: Friday weekend prep, supplier price movement, and a manager-ready recommendation.
+
+## Why It Matters
+
+Restaurant operators do not need another dashboard that waits to be interpreted. They need a system that notices the meaningful change, understands the business context, and brings back an action with evidence.
+
+MiseLoop is designed around that idea:
+
+- Context first: raw restaurant inputs become an operational memory layer.
+- Agentic workflows: the system generates the steps needed to make a decision, not just a static report.
+- Capability resolution: if the workflow needs weather, events, supplier lookup, or another service, it can identify and bind that missing capability.
+- Human approval: external writes and purchase decisions stay manager-controlled.
+- Learning loop: when supplier prices or context change, the workflow reruns and explains the diff.
+
+The result is a restaurant operations copilot that feels less like software you operate and more like a loop that keeps the business awake.
+
+## Demo Flow
+
+```text
+Connect restaurant data
+  -> Build Restaurant Context
+  -> Generate weekend prep workflow
+  -> Detect missing capabilities
+  -> Resolve capabilities through Zero
+  -> Run workflow
+  -> Produce recommendation
+  -> Detect supplier price change
+  -> Rerun and patch recommendation
+```
+
+The frontend shows this as a guided product demo, while the backend exposes the API v3-style endpoints behind the flow.
+
+## Sponsor Tools
+
+MiseLoop uses sponsor tools where they make the product stronger, not just as stickers on the stack.
+
+- Nexla: powers the context ingestion layer. MiseLoop attempts to read restaurant source data through Nexla, then surfaces whether the context came from live, cached, or fixture mode. This makes the data layer demo-safe while still showing a path to real data operations.
+- Zero: powers capability discovery and binding. The backend includes a Zero CLI detection boundary and a live resolver hook, then falls back to a fixture capability catalog when the live resolver is unavailable. This keeps the agent workflow resilient while showing how missing services can be discovered at runtime.
+- LLM providers: the architecture supports Claude, OpenAI, and Gemini configuration for future live workflow generation. The P0 demo currently uses a deterministic generator so the main demo path stays reliable.
+
+The Inspector panel makes these dependency modes visible during the demo: `live`, `cached`, or `fixture`, with fallback notes. That transparency is intentional. Real operations systems need graceful degradation, not mystery failures.
 
 ## What Works Now
 
-- Frontend demo flow: Connect -> Build Context -> Generate Workflow -> Resolve Capabilities -> Run -> Learn / Patch Recommendation.
-- Backend API shell with a unified success envelope: `success`, `message`, `data`, `meta`, `timestamp`.
-- Real API mode from the frontend through FastAPI, with fixture fallback available.
-- Nexla context adapter with live/cached/fixture diagnostics.
-- Zero capability provider with CLI detection boundary and fixture fallback.
-- Deterministic workflow generator and runner for a reliable hackathon demo.
-- Inspector panel showing dependency modes and fallback notes for Nexla, Zero, workflow generator, and workflow runner.
+- Frontend demo flow from connect to patched recommendation.
+- Backend FastAPI shell with API v3-style response envelopes.
+- Real API mode from the frontend through FastAPI.
+- Fixture mode for local-only demos.
+- Nexla adapter with live/cached/fixture diagnostics.
+- Zero provider with CLI detection boundary and fixture fallback.
+- Deterministic workflow generator and runner for a stable P0 demo.
+- Context diff and recommendation update in the Learn step.
 
 ## Repo Layout
 
@@ -94,11 +139,6 @@ Current P0 endpoints:
 - `POST /api/workflows/{workflow_id}/run`
 - `POST /api/workflows/{workflow_id}/rerun`
 
-Planned P1 endpoints:
-
-- `GET /api/workflows/{workflow_id}/timeline`
-- `POST /api/actions/{action_id}/approve`
-
 ## Verification
 
 Backend smoke test:
@@ -115,18 +155,3 @@ cd C:\Users\yupen\Documents\MiseLoop\MiseLoop\frontend
 npm run typecheck
 npm run build
 ```
-
-## Current PRD / API Status
-
-P0 demo contract is mostly complete. API v3 strictness is still partial.
-
-Known gaps:
-
-- `restaurant_context` still uses the current demo mapping and is not fully normalized to the final `sales / inventory / supplier_price / external` document shape.
-- Request/response Pydantic models and JSON schema validation are not fully formalized.
-- Error envelope is not yet system-wide for all failure cases.
-- Nexla live mode depends on valid environment variables and reachable resource ids.
-- Zero has CLI detection and fallback, but still needs the final live resolver command contract.
-- P1 timeline and approval endpoints are not implemented yet.
-
-For a hackathon demo, the strongest path is to show the dependency modes clearly in the Inspector and keep the fixture fallback visible as intentional resilience.
