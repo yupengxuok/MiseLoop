@@ -37,6 +37,7 @@ export function mapDashboardToDemoState(
       ...fallbackState.dependencyMode,
       ...dashboard.data.dependency_mode,
     },
+    integrationDiagnostics: dashboard.data.integration_diagnostics ?? fallbackState.integrationDiagnostics,
     contextVersion: dashboard.data.context?.version ?? fallbackState.contextVersion,
     workflowId: dashboard.data.workflow.workflow_id ?? fallbackState.workflowId,
     sourceCards: mapSourceCards(dashboard.data.context?.source_cards, fallbackState.sourceCards),

@@ -4,6 +4,7 @@ import type {
   DependencyMode,
   IntakeId,
   IntakeUploadPayload,
+  IntegrationDiagnostics,
   StageId,
 } from "../demoState/demoState";
 
@@ -48,6 +49,7 @@ export type DashboardResponse = ApiEnvelope<{
     self_corrections: number;
     estimated_cost_savings: number;
   };
+  integration_diagnostics?: IntegrationDiagnostics;
 }>;
 
 export type DashboardSourceCard = {
@@ -58,6 +60,8 @@ export type DashboardSourceCard = {
   raw_input_type?: string;
   normalized_context_field?: string;
   freshness?: string;
+  extraction_backend?: string | string[] | null;
+  line_items?: number;
 };
 
 export type DashboardBoundCapability = {

@@ -96,6 +96,7 @@ class DemoStore:
             "timeline": deepcopy(state["timeline"]),
             "recommendation": deepcopy(state["recommendation"]),
             "metrics": deepcopy(state["metrics"]),
+            "integration_diagnostics": self._integration_diagnostics(),
         }
 
     def build_context(self, body: dict[str, Any]) -> dict[str, Any]:
@@ -110,6 +111,7 @@ class DemoStore:
         }
         self.state["workflow_status"] = "CONTEXT_READY"
         self.state["dependency_mode"].update(context_data["dependency_mode"])
+        self.state["integration_notes"]["nexla"] = context_data.get("provider_note")
         return context_data
 
     def generate_workflow(self, body: dict[str, Any]) -> dict[str, Any]:
@@ -145,6 +147,7 @@ class DemoStore:
         self.state["bound_capabilities"] = bound
         self.state["metrics"]["capabilities_resolved"] = len(bound)
         self.state["dependency_mode"].update(resolved["dependency_mode"])
+        self.state["integration_notes"]["zero"] = resolved.get("provider_note")
         return resolved
 
     def run_workflow(self, workflow_id: str) -> dict[str, Any]:
@@ -225,6 +228,10 @@ class DemoStore:
                 "self_corrections": 0,
                 "estimated_cost_savings": 0,
             },
+            "integration_notes": {
+                "nexla": None,
+                "zero": "Zero CLI not resolved yet; waiting for capability resolution step.",
+            },
         }
 
     def _default_sources(self) -> list[dict[str, str]]:
@@ -233,5 +240,19 @@ class DemoStore:
             {"type": "inventory", "source_id": "inventory_current"},
             {"type": "supplier_prices", "source_id": "supplier_prices_q3"},
         ]
+
+    def _integration_diagnostics(self) -> dict[str, Any]:
+        return {
+            "nexla": {
+                **self.nexla_context_provider.diagnostics(),
+                "mode": self.state["dependency_mode"].get("nexla", "fixture"),
+                "provider_note": self.state["integration_notes"].get("nexla"),
+            },
+            "zero": {
+                **self.zero_capability_provider.diagnostics(),
+                "mode": self.state["dependency_mode"].get("zero", "fixture"),
+                "provider_note": self.state["integration_notes"].get("zero"),
+            },
+        }
 
 demo_store = DemoStore()

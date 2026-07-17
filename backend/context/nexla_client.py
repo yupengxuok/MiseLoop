@@ -63,7 +63,10 @@ class NexlaClient:
         self.api_key = api_key or os.getenv("NEXLA_API_KEY")
         # 实测真实 base（Nexla agent 给的 api.nexla.io 不存在）。
         self.base_url = (
-            base_url or os.getenv("NEXLA_API_BASE", "https://dataops.nexla.io/nexla-api")
+            base_url
+            or os.getenv("NEXLA_API_BASE")
+            or os.getenv("EXLA_API_BASE")
+            or "https://dataops.nexla.io/nexla-api"
         ).rstrip("/")
         self.timeout = float(
             timeout_seconds

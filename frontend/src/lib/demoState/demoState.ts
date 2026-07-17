@@ -12,6 +12,29 @@ export type IntakeStatus = "READY" | "PARSED" | "MAPPED";
 export type SourceStatus = "PARSED" | "MAPPED";
 export type DependencyMode = "live" | "cached" | "fixture";
 
+export type IntegrationDiagnostics = {
+  nexla?: {
+    mode?: DependencyMode;
+    configured?: boolean;
+    configured_parts?: Record<string, boolean>;
+    auth_mode?: string;
+    records_path?: string;
+    timeout_seconds?: number;
+    cached_context_available?: boolean;
+    fallback?: string;
+    provider_note?: string | null;
+  };
+  zero?: {
+    mode?: DependencyMode;
+    cli_detected?: boolean;
+    cli_path?: string | null;
+    setup_hint?: string;
+    fallback?: string;
+    fallback_available?: boolean;
+    provider_note?: string | null;
+  };
+};
+
 export type IntakeItem = {
   id: IntakeId;
   label: string;
@@ -175,6 +198,7 @@ export type DemoState = {
   phase: DemoPhase;
   activeStage: StageId;
   dependencyMode: Partial<Record<"nexla" | "zero" | "workflow_generator", DependencyMode>>;
+  integrationDiagnostics?: IntegrationDiagnostics;
   intakeItems: IntakeItem[];
   rawInputs: RawInputPreview[];
   sourceCards: SourceCard[];
@@ -704,6 +728,19 @@ export function createInitialDemoState(): DemoState {
     phase: "EMPTY",
     activeStage: "connect",
     dependencyMode: { nexla: "fixture", zero: "live", workflow_generator: "fixture" },
+    integrationDiagnostics: {
+      nexla: {
+        mode: "fixture",
+        configured: false,
+        fallback: "cached context file, then deterministic fixture",
+      },
+      zero: {
+        mode: "fixture",
+        cli_detected: false,
+        fallback: "zero_capabilities.json",
+        provider_note: "Zero CLI not resolved yet; waiting for capability resolution step.",
+      },
+    },
     intakeItems: INITIAL_INTAKE_ITEMS,
     rawInputs: [],
     sourceCards: [],

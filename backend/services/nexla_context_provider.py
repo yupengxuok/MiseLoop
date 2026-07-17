@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import json
+import os
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from backend.context.nexla_client import load_dotenv
 
 
 DEFAULT_CONTEXT_ID = "ctx_001"
@@ -24,6 +27,24 @@ class NexlaContextProvider:
     def __init__(self, output_path: str | Path | None = None) -> None:
         backend_root = Path(__file__).resolve().parents[1]
         self.output_path = Path(output_path or backend_root / "output" / "restaurant_context.json")
+
+    def diagnostics(self) -> dict[str, Any]:
+        load_dotenv()
+        configured = {
+            "api_key": bool(os.getenv("NEXLA_API_KEY")),
+            "api_base": bool(os.getenv("NEXLA_API_BASE") or os.getenv("EXLA_API_BASE")),
+            "pdf_resource_id": bool(os.getenv("NEXLA_PDF_RESOURCE_ID")),
+            "xlsx_resource_id": bool(os.getenv("NEXLA_XLSX_RESOURCE_ID")),
+        }
+        return {
+            "configured": all(configured.values()),
+            "configured_parts": configured,
+            "auth_mode": os.getenv("NEXLA_AUTH_MODE", "auto"),
+            "records_path": os.getenv("NEXLA_RECORDS_PATH", "/data_sets/{id}/samples"),
+            "timeout_seconds": float(os.getenv("NEXLA_TIMEOUT_SECONDS", "60")),
+            "fallback": "cached context file, then deterministic fixture",
+            "cached_context_available": self.output_path.exists(),
+        }
 
     def build(self, requested_sources: list[dict[str, Any]] | None = None) -> dict[str, Any]:
         try:
@@ -77,6 +98,7 @@ class NexlaContextProvider:
             "source_cards": source_cards,
             "dependency_mode": {"nexla": mode},
             "provider_note": note,
+            "integration_diagnostics": {"nexla": self.diagnostics()},
         }
 
     def _source_cards(

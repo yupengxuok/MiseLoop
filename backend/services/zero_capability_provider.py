@@ -8,6 +8,8 @@ API contract.
 from __future__ import annotations
 
 import json
+import os
+import shutil
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -19,6 +21,16 @@ class ZeroCapabilityProvider:
         self.catalog_path = Path(
             catalog_path or backend_root / "data" / "fixtures" / "zero_capabilities.json"
         )
+
+    def diagnostics(self) -> dict[str, Any]:
+        cli_path = os.getenv("ZERO_CLI_PATH") or shutil.which("zero")
+        return {
+            "cli_detected": bool(cli_path),
+            "cli_path": cli_path,
+            "setup_hint": "npm i -g @zeroxyz/cli; zero init; zero auth login",
+            "fallback": str(self.catalog_path.name),
+            "fallback_available": self.catalog_path.exists(),
+        }
 
     def search(self, requirement: dict[str, Any] | str) -> list[dict[str, Any]]:
         name = requirement if isinstance(requirement, str) else requirement.get("name")
@@ -105,6 +117,8 @@ class ZeroCapabilityProvider:
             "bound_capabilities": bound_capabilities,
             "bound_workflow": bound_workflow,
             "dependency_mode": {"zero": self._dependency_mode(bound_capabilities)},
+            "provider_note": self._provider_note(),
+            "integration_diagnostics": {"zero": self.diagnostics()},
         }
 
     def _load_catalog(self) -> list[dict[str, Any]]:
@@ -115,6 +129,12 @@ class ZeroCapabilityProvider:
         if capabilities and all(capability.get("provider") == "zero" for capability in capabilities):
             return "live"
         return "fixture"
+
+    def _provider_note(self) -> str:
+        diagnostics = self.diagnostics()
+        if diagnostics["cli_detected"]:
+            return "Zero CLI detected; fixture catalog is still used for deterministic demo binding."
+        return "Zero CLI not detected; using zero_capabilities.json fixture catalog."
 
     def _missing_event(self, requirement: dict[str, Any] | str) -> dict[str, Any]:
         name = requirement if isinstance(requirement, str) else requirement.get("name")
